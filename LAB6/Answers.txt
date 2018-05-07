@@ -1,0 +1,6 @@
+2)
+a. Instruction Memory, Register File, ALU
+b. Instruction Memory, Register File, ALU
+c. Instruction Memory, Register File, Data Memory, ALU
+d. Instruction Memory, Register File, ALU
+e. Instruction Memory
