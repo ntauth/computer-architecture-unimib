@@ -72,7 +72,8 @@ jr $ra
 
 ###############################################
 #             Procedura GetCh                 #
-#                                             #
+# 	li $t0, InDev
+                                            #
 # Riceve da tastiera 1 char                   # 
 #                                             #
 # IN:                                         #
@@ -81,9 +82,30 @@ jr $ra
 #   $v0: carattere ricevuto da tastiera       #
 ###############################################
 GetCh:
-  # IMPLEMENTARE ... (con busy wait/polling)
+  # Prolog
+	addiu $sp, $sp, -8
+	sw $ra, 4($sp)
+	sw $fp, 0($sp)
+	addiu $fp, $sp, 4
+	addiu $sp, $sp, -4
+	sw $a0, -8($fp)
 
-jr $ra
+	lw $t0, InDev
+busy_wait_begin:
+	lw $t1, 0($t0)
+	andi $t1, $t1, 0x1
+	beqz $t1, busy_wait_begin
+ready:
+	lw $v0, 4($t0)
+	andi $v0, $v0, 0xFF
+
+	# Epilog
+	lw $ra,  0($fp)
+	lw $a0, -8($fp)
+	lw $fp, -4($fp)
+	addiu $sp, $sp, 12
+
+	jr $ra
 #####################################
 #          Fine GetCh               #
 #####################################
@@ -119,10 +141,12 @@ ReadStre:
 
   # Ciclo di ricezione dei caratteri
 CharRecLoop:
-  jal GetCh
-  move $s1, $v0
+  	jal GetCh
+  	move $s1, $v0
 
     # Echo a schermo invocando PutCh ????
+	move $a0, $s1
+	jal PutCh
 
     # Ctrl fine stringa
     beq   $s1, 10, EndCharRecLoop # se char = "invio" esci dal ciclo
@@ -139,7 +163,8 @@ EndCharRecLoop:
   sb    $0, 0($s0)                # terminazione della stringa con char '\0'
 
   # write immediato della stringa invocando WriteStr ????
-
+  # lw $a0, 32($sp)
+  # jal WriteStr
 
   # Epilogo
   # Ripristina i registri
@@ -147,10 +172,10 @@ EndCharRecLoop:
   lw    $s1, 20($sp)
   lw    $s2, 24($sp)
   lw    $ra, 28($sp)
-
+  lw    $a0, 32($sp)
   addi  $sp, $sp, 32
 
-jr  $ra
+  jr  $ra
 ###############################################
 #                 Fine ReadStre               #
 ###############################################
